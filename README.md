@@ -13,6 +13,18 @@ I mainly use these for personal automation, and Firebase Cloud Functions allows 
 make lint
 ```
 
+### Check Formatting
+
+```bash
+make format
+```
+
+### Security Check
+
+```bash
+make secure
+```
+
 ### Deploy
 
 ```bash
