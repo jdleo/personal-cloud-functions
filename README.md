@@ -1,7 +1,6 @@
 ![Pylint](https://github.com/jdleo/personal-cloud-functions/actions/workflows/pylint.yml/badge.svg)
 ![Black](https://github.com/jdleo/personal-cloud-functions/actions/workflows/black.yml/badge.svg)
 ![Bandit](https://github.com/jdleo/personal-cloud-functions/actions/workflows/bandit.yml/badge.svg)
-![Deploy](https://github.com/jdleo/personal-cloud-functions/actions/workflows/deploy.yml/badge.svg)
 
 ### About
 

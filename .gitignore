@@ -66,4 +66,7 @@ node_modules/
 .env
 
 # venv
-*venv/
+**/venv/
+
+# py cache
+**/__pycache__/
