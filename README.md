@@ -1,3 +1,6 @@
+![Pylint](https://github.com/jdleo/personal-cloud-functions/actions/workflows/pylint.yml/badge.svg)
+![lint](https://github.com/<OWNER>/<REPOSITORY>/actions/workflows/<WORKFLOW_FILE>/badge.svg)
+
 ### About
 
 This is just a boring repository that houses some personal cloud functions.
