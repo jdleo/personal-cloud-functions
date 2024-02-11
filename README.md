@@ -18,13 +18,13 @@ make lint
 ### Check Formatting
 
 ```bash
-make format
+make black
 ```
 
 ### Security Check
 
 ```bash
-make secure
+make bandit
 ```
 
 ### Deploy
