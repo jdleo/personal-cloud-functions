@@ -14,4 +14,4 @@ black:
 
 # To deploy the application
 deploy:
-	@firebase deploy --only functions
+	@firebase deploy --only functions --token "${FIREBASE_TOKEN}"
