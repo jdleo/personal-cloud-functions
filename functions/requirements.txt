@@ -1,2 +1,4 @@
 firebase-admin
 pylint
+black
+bandit
