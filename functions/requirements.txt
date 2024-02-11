@@ -1,2 +1,2 @@
-firebase_functions
+firebase-admin
 pylint
