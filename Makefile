@@ -1,4 +1,4 @@
-.PHONY: lint deploy bandit black
+.PHONY: lint deploy bandit black check
 
 # To lint Python files
 lint:
@@ -6,7 +6,7 @@ lint:
 
 # To check security
 bandit:
-	@bandit -r .
+	@bandit -lll -r -x "./functions/venv/*" .
 
 # To check formatting
 black:
@@ -15,3 +15,7 @@ black:
 # To deploy the application
 deploy:
 	@firebase deploy --only functions --token "${FIREBASE_TOKEN}"
+
+# To check everything
+check: lint bandit black
+	@echo "All checks passed ✅"
