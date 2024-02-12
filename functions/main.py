@@ -9,7 +9,6 @@ from firebase_functions import https_fn, options
 from sklearn.linear_model import LinearRegression
 import flask
 import pandas as pd
-from flask import request
 
 initialize_app()
 app = flask.Flask(__name__)
