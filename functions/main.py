@@ -67,10 +67,32 @@ def predict_weight():
     intercept = model.intercept_
     linreg_formula = f"Weight = {slope:.2f} * DateOrdinal + {intercept:.2f}"
 
+    # Predict the weight for 15, 30, 45, 60, 90 days from last date
+    last_date = df["date"].iloc[-1]
+    last_date_ordinal = last_date.toordinal()
+    predictions = []
+    for days in [15, 30, 45, 60, 90]:
+        new_date_ordinal = last_date_ordinal + days
+        new_weight = model.predict([[new_date_ordinal]])[0]
+        predictions.append(
+            (pd.to_datetime(new_date_ordinal, origin="unix"), new_weight)
+        )
+
+    # format each prediction date as simple MM/DD format
+    predictions = [(date.strftime("%m/%d"), weight) for date, weight in predictions]
+
     # Formatting the response
     return dedent(
         f"""
-        Linear Regression Formula: {linreg_formula}
+        Linear Regression Formula:
+        {linreg_formula}
+
+        Predictions:
+        - {predictions[0][0]}: {predictions[0][1]:.2f} lbs
+        - {predictions[1][0]}: {predictions[1][1]:.2f} lbs
+        - {predictions[2][0]}: {predictions[2][1]:.2f} lbs
+        - {predictions[3][0]}: {predictions[3][1]:.2f} lbs
+        - {predictions[4][0]}: {predictions[4][1]:.2f} lbs
     """
     )
 
