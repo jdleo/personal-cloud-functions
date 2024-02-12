@@ -2,4 +2,6 @@ firebase-admin
 pylint
 black
 bandit
+pandas
+scikit-learn
 firebase_functions~=0.1.0

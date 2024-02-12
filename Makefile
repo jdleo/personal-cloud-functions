@@ -2,7 +2,7 @@
 
 # To lint Python files
 lint:
-	@pylint $(shell git ls-files '*.py')
+	@pylint $(shell git ls-files '*.py') --disable=R0914
 
 # To check security
 bandit:

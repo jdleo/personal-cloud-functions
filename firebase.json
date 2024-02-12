@@ -2,13 +2,9 @@
   "functions": [
     {
       "source": "functions",
+      "memory": "512MB",
       "codebase": "default",
-      "ignore": [
-        "venv",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ]
+      "ignore": ["venv", ".git", "firebase-debug.log", "firebase-debug.*.log"]
     }
   ]
 }
