@@ -41,8 +41,13 @@ def predict_weight():
             for j in range(1, (next_date - current_date).days):
                 new_date = current_date + pd.Timedelta(days=j)
                 new_weight = (df["weight"].iloc[i] + df["weight"].iloc[i + 1]) / 2
-                df = df.append(
-                    {"date": new_date, "weight": new_weight}, ignore_index=True
+                df = pd.concat(
+                    [
+                        df,
+                        pd.DataFrame(
+                            [[new_date, new_weight]], columns=["date", "weight"]
+                        ),
+                    ]
                 )
 
     # Converting dates to ordinal for linear regression
