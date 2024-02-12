@@ -9,6 +9,7 @@ from firebase_functions import https_fn, options
 from sklearn.linear_model import LinearRegression
 import flask
 import pandas as pd
+from flask import request
 
 initialize_app()
 app = flask.Flask(__name__)
@@ -73,13 +74,9 @@ def predict_weight():
     predictions = []
     for days in [15, 30, 45, 60, 90]:
         new_date_ordinal = last_date_ordinal + days
+        new_date = pd.Timestamp.fromordinal(new_date_ordinal)
         new_weight = model.predict([[new_date_ordinal]])[0]
-        predictions.append(
-            (pd.to_datetime(new_date_ordinal, origin="unix"), new_weight)
-        )
-
-    # format each prediction date as simple MM/DD format
-    predictions = [(date.strftime("%m/%d"), weight) for date, weight in predictions]
+        predictions.append((new_date.strftime("%m/%d"), new_weight))
 
     # Formatting the response
     return dedent(
