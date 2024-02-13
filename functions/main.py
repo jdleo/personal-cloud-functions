@@ -4,6 +4,7 @@ This will house various cloud functions.
 """
 
 from textwrap import dedent
+from datetime import datetime, timedelta
 from firebase_admin import initialize_app
 from firebase_functions import https_fn, options
 from sklearn.linear_model import LinearRegression
@@ -73,13 +74,9 @@ def predict_weight():
     predictions = []
     for days in [15, 30, 45, 60, 90]:
         new_date_ordinal = last_date_ordinal + days
+        new_date = pd.Timestamp.fromordinal(new_date_ordinal)
         new_weight = model.predict([[new_date_ordinal]])[0]
-        predictions.append(
-            (pd.to_datetime(new_date_ordinal, origin="unix"), new_weight)
-        )
-
-    # format each prediction date as simple MM/DD format
-    predictions = [(date.strftime("%m/%d"), weight) for date, weight in predictions]
+        predictions.append((new_date.strftime("%m/%d"), new_weight))
 
     # Formatting the response
     return dedent(
@@ -93,6 +90,78 @@ def predict_weight():
         - {predictions[2][0]}: {predictions[2][1]:.2f} lbs
         - {predictions[3][0]}: {predictions[3][1]:.2f} lbs
         - {predictions[4][0]}: {predictions[4][1]:.2f} lbs
+    """
+    )
+
+
+@app.post("/predict_money")
+def predict_money():
+    """Use iterative modeling to help predict financial health for the year"""
+
+    # Get input values from the request
+    data = flask.request.json
+    starting_balance = data.get("starting_balance")
+    daily_pay = data.get("daily_pay")
+    bill_days = data.get("bill_days").split(",")
+    bill_amounts = list(map(float, data.get("bill_amounts").split(",")))
+    bill_expiry_dates = data.get("bill_expiry_dates").split(",")
+    cashflow_dates = data.get("cashflow_dates").split(",")
+    cashflow_amounts = list(map(float, data.get("cashflow_amounts").split(",")))
+
+    # Get the starting and ending date of the simulation (end is a year ahead)
+    start_date = datetime.now()
+    end_date = start_date + timedelta(days=365)
+
+    # Initialize variables
+    balance = starting_balance
+    current_date = start_date
+    dates = []
+    balances = []
+
+    # Loop from today's date to end_date
+    while current_date <= end_date:
+        # Apply daily pay on weekdays
+        if current_date.weekday() < 5:
+            # Edge case, don't apply daily pay if this is ran past 11pm UTC TODAY
+            if current_date.hour >= 23 and current_date.date() == datetime.now().date():
+                pass
+            else:
+                balance += daily_pay
+
+        # Apply bills
+        for day, amount, expiry in zip(bill_days, bill_amounts, bill_expiry_dates):
+            if current_date.day == int(day):
+                if expiry == "null" or current_date.strftime("%Y-%m-%d") <= expiry:
+                    balance -= amount
+
+        # Apply ad hoc cashflows
+        for date, amount in zip(cashflow_dates, cashflow_amounts):
+            if current_date.strftime("%Y-%m-%d") == date:
+                balance += amount
+
+        # Increment the date by one day and add balance (rounded to 2) and date to the list
+        balances.append(round(balance, 2))
+        dates.append(current_date.strftime("%Y-%m-%d"))
+        current_date += timedelta(days=1)
+
+    # Find local maxima and minima in all balances
+    local_maxima = [
+        (dates[i], balances[i])
+        for i in range(3, len(balances) - 3)
+        if balances[i] == max(balances[i - 3 : i + 4])
+        and balances[i] != balances[i - 1]
+    ]
+    local_minima = [
+        (dates[i], balances[i])
+        for i in range(3, len(balances) - 3)
+        if balances[i] == min(balances[i - 3 : i + 4])
+        and balances[i] != balances[i - 1]
+    ]
+
+    return dedent(
+        f"""
+    Local Minima: {local_minima},
+    Local Maxima: {local_maxima}
     """
     )
 
