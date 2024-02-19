@@ -34,23 +34,6 @@ def predict_weight():
     df["date"] = pd.to_datetime(df["date"])
     df["weight"] = df["weight"].astype(float)
 
-    # Average/smooth out missing data
-    for i in range(len(df) - 1):
-        current_date = df["date"].iloc[i]
-        next_date = df["date"].iloc[i + 1]
-        if (next_date - current_date).days > 1:
-            for j in range(1, (next_date - current_date).days):
-                new_date = current_date + pd.Timedelta(days=j)
-                new_weight = (df["weight"].iloc[i] + df["weight"].iloc[i + 1]) / 2
-                df = pd.concat(
-                    [
-                        df,
-                        pd.DataFrame(
-                            [[new_date, new_weight]], columns=["date", "weight"]
-                        ),
-                    ]
-                )
-
     # Converting dates to ordinal for linear regression
     df["date_ordinal"] = pd.to_datetime(df["date"]).apply(lambda date: date.toordinal())
 
@@ -122,8 +105,13 @@ def predict_money():
     while current_date <= end_date:
         # Apply daily pay on weekdays
         if current_date.weekday() < 5:
-            # Edge case, don't apply daily pay if this is ran past 11pm UTC TODAY
-            if current_date.hour >= 23 and current_date.date() == datetime.now().date():
+            # Convert current time to PST (UTC-8)
+            current_date_pst = current_date - timedelta(hours=8)
+            # Edge case, don't apply daily pay if it's past 2pm PST because it already hit
+            if (
+                current_date_pst.hour >= 14
+                and current_date.date() == datetime.now().date()
+            ):
                 pass
             else:
                 balance += daily_pay
