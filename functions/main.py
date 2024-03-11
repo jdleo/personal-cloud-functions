@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from firebase_admin import initialize_app
 from firebase_functions import https_fn, options
 from sklearn.linear_model import LinearRegression
+from pytz import timezone
 import flask
 import pandas as pd
 
@@ -92,7 +93,7 @@ def predict_money():
     cashflow_amounts = list(map(float, data.get("cashflow_amounts").split(",")))
 
     # Get the starting and ending date of the simulation (end is a year ahead)
-    start_date = datetime.now()
+    start_date = datetime.now(timezone("America/Los_Angeles"))
     end_date = start_date + timedelta(days=365)
 
     # Initialize variables
@@ -105,12 +106,11 @@ def predict_money():
     while current_date <= end_date:
         # Apply daily pay on weekdays
         if current_date.weekday() < 5:
-            # Convert current time to PST (UTC-8)
-            current_date_pst = current_date - timedelta(hours=8)
             # Edge case, don't apply daily pay if it's past 2pm PST because it already hit
             if (
-                current_date_pst.hour >= 14
-                and current_date.date() == datetime.now().date()
+                current_date.hour >= 14
+                and current_date.date()
+                == datetime.now(timezone("America/Los_Angeles")).date()
             ):
                 pass
             else:
@@ -132,24 +132,17 @@ def predict_money():
         dates.append(current_date.strftime("%Y-%m-%d"))
         current_date += timedelta(days=1)
 
-    # Find local maxima and minima in all balances
-    local_maxima = [
-        (dates[i], balances[i])
-        for i in range(3, len(balances) - 3)
-        if balances[i] == max(balances[i - 3 : i + 4])
-        and balances[i] != balances[i - 1]
-    ]
+    # Find local minima in all balances
     local_minima = [
         (dates[i], balances[i])
-        for i in range(3, len(balances) - 3)
-        if balances[i] == min(balances[i - 3 : i + 4])
+        for i in range(2, len(balances) - 2)
+        if balances[i] == min(balances[i - 2 : i + 3])
         and balances[i] != balances[i - 1]
     ]
 
     return dedent(
         f"""
-    Local Minima: {local_minima},
-    Local Maxima: {local_maxima}
+    Local Minima: {' ◆ '.join([f"{date}: ${balance}" for date, balance in local_minima])}
     """
     )
 
